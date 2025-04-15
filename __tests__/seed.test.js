@@ -7,7 +7,7 @@ afterAll(() => db.end());
 
 describe('seed', () => {
   describe('topics table', () => {
-    test('topics table exists', () => {
+    test.only('topics table exists', () => {
       return db
         .query(
           `SELECT EXISTS (
@@ -22,7 +22,7 @@ describe('seed', () => {
         });
     });
 
-    test('topics table has slug column as varying character', () => {
+    test.only('topics table has slug column as varying character', () => {
       return db
         .query(
           `SELECT *
@@ -36,7 +36,7 @@ describe('seed', () => {
         });
     });
 
-    test('topics table has slug column as the primary key', () => {
+    test.only('topics table has slug column as the primary key', () => {
       return db
         .query(
           `SELECT column_name
@@ -51,7 +51,7 @@ describe('seed', () => {
         });
     });
 
-    test('topics table has description column as varying character', () => {
+    test.only('topics table has description column as varying character', () => {
       return db
         .query(
           `SELECT column_name, data_type, column_default
@@ -65,7 +65,7 @@ describe('seed', () => {
         });
     });
 
-    test('topics table has img_url column of varying character of max length 1000', () => {
+    test.only('topics table has img_url column of varying character of max length 1000', () => {
       return db
         .query(
           `SELECT column_name, data_type, character_maximum_length
@@ -97,7 +97,7 @@ describe('seed', () => {
         });
     });
 
-    test('users table has username column of varying character', () => {
+    test.only('users table has username column of varying character', () => {
       return db
         .query(
           `SELECT column_name, data_type, column_default
@@ -111,7 +111,7 @@ describe('seed', () => {
         });
     });
 
-    test('users table has username column as the primary key', () => {
+    test.only('users table has username column as the primary key', () => {
       return db
         .query(
           `SELECT column_name
@@ -126,7 +126,7 @@ describe('seed', () => {
         });
     });
 
-    test('users table has name column as varying character', () => {
+    test.only('users table has name column as varying character', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -140,7 +140,7 @@ describe('seed', () => {
         });
     });
 
-    test('users table has avatar_url column of varying character of max length 1000', () => {
+    test.only('users table has avatar_url column of varying character of max length 1000', () => {
       return db
         .query(
           `SELECT column_name, character_maximum_length
@@ -156,7 +156,7 @@ describe('seed', () => {
   });
 
   describe('articles table', () => {
-    test('articles table exists', () => {
+    test.only('articles table exists', () => {
       return db
         .query(
           `SELECT EXISTS (
@@ -171,7 +171,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has article_id column as a serial', () => {
+    test.only('articles table has article_id column as a serial', () => {
       return db
         .query(
           `SELECT column_name, data_type, column_default
@@ -188,7 +188,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has article_id column as the primary key', () => {
+    test.only('articles table has article_id column as the primary key', () => {
       return db
         .query(
           `SELECT column_name
@@ -203,7 +203,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has title column as varying character', () => {
+    test.only('articles table has title column as varying character', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -217,7 +217,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has topic column as varying character', () => {
+    test.only('articles table has topic column as varying character', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -231,7 +231,7 @@ describe('seed', () => {
         });
     });
 
-    test('topic column references a slug from the topics table', () => {
+    test.only('topic column references a slug from the topics table', () => {
       return db.query(`
         SELECT *
         FROM information_schema.table_constraints AS tc
@@ -250,7 +250,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has author column as varying character', () => {
+    test.only('articles table has author column as varying character', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -264,7 +264,7 @@ describe('seed', () => {
         });
     });
 
-    test('author column references a username from the users table', () => {
+    test.only('author column references a username from the users table', () => {
       return db.query(`
         SELECT *
         FROM information_schema.table_constraints AS tc
@@ -283,7 +283,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has body column as text', () => {
+    test.only('articles table has body column as text', () => {
       return db
         .query(
           `SELECT column_name, data_type, character_maximum_length
@@ -297,7 +297,7 @@ describe('seed', () => {
         });
     });
 
-    test('articles table has created_at column as timestamp', () => {
+    test.only('articles table has created_at column as timestamp', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -311,7 +311,7 @@ describe('seed', () => {
         });
     });
 
-    test('created_at column has default value of the current timestamp', () => {
+    test.only('created_at column has default value of the current timestamp', () => {
       return db.query(
         `SELECT column_default
         FROM information_schema.columns
@@ -322,7 +322,7 @@ describe('seed', () => {
       });
     });
 
-    test('articles table has votes column as integer', () => {
+    test.only('articles table has votes column as integer', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -336,7 +336,7 @@ describe('seed', () => {
         });
     });
 
-    test('votes column has default value of 0', () => { 
+    test.only('votes column has default value of 0', () => { 
       return db.query(
         `SELECT column_default
           FROM information_schema.columns
@@ -347,7 +347,7 @@ describe('seed', () => {
       });
     });
 
-    test('articles table has article_img_url column of varying character of max length 1000', () => {
+    test.only('articles table has article_img_url column of varying character of max length 1000', () => {
       return db
         .query(
           `SELECT column_name, data_type, character_maximum_length
@@ -364,7 +364,7 @@ describe('seed', () => {
   });
 
   describe('comments table', () => {
-    test('comments table exists', () => {
+    test.only('comments table exists', () => {
       return db
         .query(
           `SELECT EXISTS (
@@ -379,7 +379,7 @@ describe('seed', () => {
         });
     });
 
-    test('comments table has comment_id column as serial', () => {
+    test.only('comments table has comment_id column as serial', () => {
       return db
         .query(
           `SELECT column_name, data_type, column_default
@@ -396,7 +396,7 @@ describe('seed', () => {
         });
     });
 
-    test('comments table has comment_id column as the primary key', () => {
+    test.only('comments table has comment_id column as the primary key', () => {
       return db
         .query(
           `SELECT column_name
@@ -411,7 +411,7 @@ describe('seed', () => {
         });
     });
 
-    test('comments table has article_id column as integer', () => {
+    test.only('comments table has article_id column as integer', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -425,7 +425,7 @@ describe('seed', () => {
         });
     });
 
-    test('article_id column references an article from the articles table', () => {
+    test.only('article_id column references an article from the articles table', () => {
       return db.query(`
         SELECT *
         FROM information_schema.table_constraints AS tc
@@ -443,7 +443,7 @@ describe('seed', () => {
       });
     });
 
-    test('comments table has body column as text', () => {
+    test.only('comments table has body column as text', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -457,7 +457,7 @@ describe('seed', () => {
         });
     });
 
-    test('comments table has votes column as integer', () => {
+    test.only('comments table has votes column as integer', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -471,7 +471,7 @@ describe('seed', () => {
         });
     });
 
-    test('votes column has default value of 0', () => { 
+    test.only('votes column has default value of 0', () => { 
       return db.query(
         `SELECT column_default
           FROM information_schema.columns
@@ -482,7 +482,7 @@ describe('seed', () => {
       });
     });
 
-    test("comments table has an author column as varying character", () => { 
+    test.only("comments table has an author column as varying character", () => { 
       return db
         .query(
           `SELECT *
@@ -496,7 +496,7 @@ describe('seed', () => {
         });
     })
 
-    test("author column references a username from the users table", () => { 
+    test.only("author column references a username from the users table", () => { 
       return db.query(`
         SELECT *
         FROM information_schema.table_constraints AS tc
@@ -515,7 +515,7 @@ describe('seed', () => {
         });
     })
 
-    test('comments table has created_at column as timestamp', () => {
+    test.only('comments table has created_at column as timestamp', () => {
       return db
         .query(
           `SELECT column_name, data_type
@@ -529,7 +529,7 @@ describe('seed', () => {
         });
     });
 
-    test('created_at column has default value of the current timestamp', () => {
+    test.only('created_at column has default value of the current timestamp', () => {
       return db.query(
         `SELECT column_default
         FROM information_schema.columns
@@ -545,7 +545,7 @@ describe('seed', () => {
 
 describe('data insertion', () => {
 
-  test('topics data has been inserted correctly', () => {
+  test.only('topics data has been inserted correctly', () => {
     return db.query(`SELECT * FROM topics;`).then(({ rows: topics }) => {
       expect(topics).toHaveLength(3);
       topics.forEach((topic) => {
