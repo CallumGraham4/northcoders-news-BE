@@ -82,7 +82,7 @@ describe('seed', () => {
   });
 
   describe('users table', () => {
-    test('users table exists', () => {
+    test.only('users table exists', () => {
       return db
         .query(
           `SELECT EXISTS (
@@ -556,7 +556,7 @@ describe('data insertion', () => {
     });
   });
 
-  test('users data has been inserted correctly', () => {
+  test.only('users data has been inserted correctly', () => {
     return db.query(`SELECT * FROM users;`).then(({ rows: users }) => {
       expect(users).toHaveLength(4);
       users.forEach((user) => {
@@ -567,7 +567,7 @@ describe('data insertion', () => {
     });
   });
   
-  test('articles data has been inserted correctly', () => {
+  test.only('articles data has been inserted correctly', () => {
     return db.query(`SELECT * FROM articles;`).then(({ rows: articles }) => {
       expect(articles).toHaveLength(13);
       articles.forEach((article) => {
@@ -583,7 +583,7 @@ describe('data insertion', () => {
     });
   });
   
-  test('comments data has been inserted correctly', () => {
+  test.only('comments data has been inserted correctly', () => {
     return db.query(`SELECT * FROM comments;`).then(({ rows: comments }) => {
       expect(comments).toHaveLength(18);
       comments.forEach((comment) => {
