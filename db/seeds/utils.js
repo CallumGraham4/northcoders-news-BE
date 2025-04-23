@@ -10,10 +10,22 @@ exports.createRef = (articlesData) => {
     return {}
   }
   const result = {}
+
   articlesData.forEach((article) => {
     result[article.title] = article.article_id
-  })
-  return result
+  }) 
 }
+
+// exports.articlesLookUp = (articlesData) => {
+//   if (articlesData.length === 0){
+//     return {}
+//   }
+//   const result = {}
+//     articlesData.forEach((article) => {
+//       result[article.title] = article.article_id
+//     })
+  
+//   return result
+// }
 
 

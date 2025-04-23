@@ -1,9 +1,7 @@
 const db = require("../connection")
 const format = require("pg-format")
-const importObj = require("./utils")
-const convertTimestampToDate = importObj.convertTimestampToDate
-const importObj2 = require("./utils")
-const createRef = importObj2.createRef
+const {convertTimestampToDate, createRef} = require("./utils")
+
 // console.log(convertTimestampToDate)
 //console.log(createRef)
 
@@ -14,32 +12,32 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     return db.query(`DROP TABLE IF EXISTS articles;`)
   })
   .then(() => {
-    return db.query(`DROP TABLE IF EXISTS users;`)
-  })
-  .then(() => {
     return db.query(`DROP TABLE IF EXISTS topics;`)
   })
   .then(() => {
-    return db.query(`CREATE TABLE topics (
-    slug VARCHAR(300) PRIMARY KEY,
-    "description" VARCHAR(500),
-    img_url VARCHAR(1000)
-);`)
+    return db.query(`DROP TABLE IF EXISTS users;`)
   })
   .then(() => {
     return db.query(`CREATE TABLE users (
-      username VARCHAR(300) PRIMARY KEY, 
-      name VARCHAR(300),
+      username VARCHAR(100) PRIMARY KEY NOT NULL UNIQUE, 
+      name VARCHAR(100) NOT NULL,
       avatar_url VARCHAR(1000)
       );`)
   })
   .then(() => {
+    return db.query(`CREATE TABLE topics (
+      slug VARCHAR(100) PRIMARY KEY,
+      description VARCHAR(500) NOT NULL,
+      img_url VARCHAR(1000)
+  );`)
+  })
+  .then(() => {
     return db.query(`CREATE TABLE articles (
       article_id SERIAL PRIMARY KEY,
-      title VARCHAR(300),
-      topic VARCHAR REFERENCES topics(slug),
-      author VARCHAR REFERENCES users(username),
-      body TEXT,
+      title VARCHAR(100) NOT NULL,
+      topic VARCHAR(100) REFERENCES topics(slug),
+      author VARCHAR(100) REFERENCES users(username),
+      body TEXT NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       votes INT DEFAULT 0,
       article_img_url VARCHAR(1000)
@@ -48,10 +46,10 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
   .then(() => {
     return db.query(`CREATE TABLE comments (
       comment_id SERIAL PRIMARY KEY,
-      article_id SERIAL REFERENCES articles(article_id),
-      body TEXT,
+      article_id INT REFERENCES articles(article_id),
+      body TEXT NOT NULL,
       votes INT DEFAULT 0,
-      author VARCHAR REFERENCES users(username),
+      author VARCHAR(100) REFERENCES users(username),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );`)
   })
@@ -62,8 +60,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     const insertTopicsQueryString = format(`
       INSERT INTO topics
       (slug, description, img_url)
-      VALUES %L
-      RETURNING *;`,
+      VALUES %L`,
       formattedTopics
     )
     return db.query(insertTopicsQueryString)
@@ -76,8 +73,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     const insertUsersQueryString = format(`
       INSERT INTO users
       (username, name, avatar_url)
-      VALUES %L
-      RETURNING *;`,
+      VALUES %L;`,
       formattedUsers
     )
     return db.query(insertUsersQueryString)
@@ -85,32 +81,54 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
   .then(() => {
     const formattedArticles = articleData.map((article) => {
       const newArticle = convertTimestampToDate(article)
-      return [newArticle.title, newArticle.body, newArticle.created_at, newArticle.votes, newArticle.article_img_url]
+      return [
+        newArticle.title, 
+        newArticle.topic,
+        newArticle.author,
+        newArticle.body, 
+        newArticle.created_at, 
+        newArticle.votes, 
+        newArticle.article_img_url]
     })
     const insertArticlesQueryString = format(`
       INSERT INTO articles
-      (title, body, created_at, votes, article_img_url)
+      (title, topic, author, body, created_at, votes, article_img_url)
       VALUES %L
       RETURNING *;`,
       formattedArticles
     )
     return db.query(insertArticlesQueryString)
   })
-  .then(() => {
+ 
+
+
+  .then((result) => {
+
+    
+
+    const articlesRefObj = createRef(result.rows)
+    console.log(articlesLookUp)
     const formattedComments = commentData.map((comment) => {
       const newComment = convertTimestampToDate(comment)
-      const author_id = createRef(articleData)
-      console.log(author_id)
-      return [author_id, newComment.body, newComment.votes, newComment.created_at]
+      return [
+      articlesRefObj[newComment.article_title],
+      newComment.body,
+      newComment.votes,
+      newComment.author,
+      newComment.created_at
+    ]
     })
-    const insertCommentsQueryString = format(`
-      INSERT INTO comments
-      (author_id, body, votes, created_at)
-      VALUES %L
-      RETURNING *;`,
+
+
+    const insertCommentsQuery = format(
+      `INSERT INTO comments(article_id, body, votes, author, created_at)
+      VALUES %L;`,
       formattedComments
     )
-    return db.query(insertCommentsQueryString)
+
+    return db.query(insertCommentsQuery)
+
+  
   })
 };
 module.exports = seed;
