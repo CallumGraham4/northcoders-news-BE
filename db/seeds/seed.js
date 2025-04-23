@@ -107,7 +107,6 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
     
 
     const articlesRefObj = createRef(result.rows)
-    console.log(articlesLookUp)
     const formattedComments = commentData.map((comment) => {
       const newComment = convertTimestampToDate(comment)
       return [

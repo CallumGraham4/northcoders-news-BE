@@ -14,6 +14,8 @@ exports.createRef = (articlesData) => {
   articlesData.forEach((article) => {
     result[article.title] = article.article_id
   }) 
+
+  return result
 }
 
 // exports.articlesLookUp = (articlesData) => {

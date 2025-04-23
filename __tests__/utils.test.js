@@ -1,5 +1,5 @@
 const {
-  convertTimestampToDate, articlesLookUp
+  convertTimestampToDate, createRef
 } = require("../db/seeds/utils");
 
 describe("convertTimestampToDate", () => {
@@ -38,14 +38,15 @@ describe("convertTimestampToDate", () => {
   });
 });
 
-describe('Create articlesLookUp obj', () => {
+describe('Create createRef obj', () => {
   test('should return an empty object when passed an empty array', () => {
     const input = []
-    const result = articlesLookUp(input)
+    const result = createRef(input)
     expect(result).toEqual({})
   })
   test('should return an object of a single key and value when passed an array of length 1', () => {
     const input = [{
+      article_id: 1,
       title: "Living in the shadow of a great man",
       topic: "mitch",
       author: "butter_bridge",
@@ -55,7 +56,7 @@ describe('Create articlesLookUp obj', () => {
       article_img_url:
         "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
     }]
-    const result = articlesLookUp(input)
+    const result = createRef(input)
     expect(result).toEqual({"Living in the shadow of a great man": 1})
   })
 
@@ -80,10 +81,8 @@ describe('Create articlesLookUp obj', () => {
       votes: 0,
       article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
     }]
-    const result = articlesLookUp(input)
+    const result = createRef(input)
     expect(result).toEqual({'Eight pug gifs that remind me of mitch': 3, 'Student SUES Mitch!': 4})
-
-
 
 
   })
