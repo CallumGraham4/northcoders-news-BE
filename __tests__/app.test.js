@@ -26,3 +26,31 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/topics", () => {
+  test("200: Responds with the topics with all properties", () => {
+    return request(app)
+    .get("/api/topics")
+    .expect(200)
+    .then(({body: {topics}}) => {
+      expect(topics.length).toBe(3)
+      topics.forEach((singleTopic) => {
+        expect(singleTopic).toMatchObject({
+          description: expect.any(String),
+          slug: expect.any(String),
+          img_url: expect.any(String)
+        })
+      })
+    })
+  })
+  test("status:404, responds with an error message when passed a non-existent endpoint", () => {
+    return request(app)
+      .get("/api/notARoute")
+      .expect(404)
+      .then(({ body: {msg} }) => {
+        console.log(msg)
+        expect(msg).toBe("404 error: not found");
+      });
+  });
+})
+

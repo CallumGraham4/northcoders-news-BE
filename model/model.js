@@ -1,9 +1,12 @@
-// const db = require("../db/connection")
-// const endpointsJson = require("../endpoints")
+const db = require("../db/connection")
 
-// const selectEndpoints = ()=>{
+const selectTopics = () => {
 
-//     return JSON.parse(endpointsJson)
-// }
+    return db.query('SELECT * FROM topics').then(({rows})=>{
 
-// module.exports = {selectEndpoints}
+        
+        return rows
+    })
+}
+
+module.exports = {selectTopics}
