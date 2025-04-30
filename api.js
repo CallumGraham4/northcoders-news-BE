@@ -1,7 +1,7 @@
 const db = require("./db/connection");
 const express = require("express");
 const app = express();
-const {getApi, getTopics, getArticleById} = require('./controller/controller')
+const {getApi, getTopics, getArticleById, getArticles} = require('./controller/controller')
 
 app.get("/api", getApi)
 
@@ -9,9 +9,15 @@ app.get("/api/topics", getTopics)
 
 app.get("/api/articles/:article_id", getArticleById)
 
-app.use((req, res) => {
+app.get("/api/articles", getArticles)
+
+app.all('/api/*splat', (req, res) => {
   res.status(404).send({ msg: "404 error: not found" });
 });
+
+// app.use((req, res) => {
+//   res.status(404).send({ msg: "404 error: not found" });
+// });
 
 app.use((err, req, res, next) => {
   // forced errors
