@@ -43,24 +43,25 @@ describe("GET /api/topics", () => {
       })
     })
   })
-  test("status:404, responds with an error message when passed a non-existent endpoint", () => {
-    return request(app)
-      .get("/api/notARoute")
-      .expect(404)
-      .then(({ body: {msg} }) => {
-        console.log(msg)
-        expect(msg).toBe("404 error: not found");
-      });
-  });
 })
 
-describe("/api/articles/:article_id", () => {
+test("status:404, responds with an error message when passed a non-existent endpoint", () => {
+  return request(app)
+    .get("/api/notARoute")
+    .expect(404)
+    .then(({ body: {msg} }) => {
+      console.log(msg)
+      expect(msg).toBe("404 error: not found");
+    });
+});
+
+describe("GET /api/articles/:article_id", () => {
   test("200: responds with the requested article_id", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
       .then(({body: {article}}) => {
-        expect(article[0]).toEqual({
+        expect(article).toEqual({
           article_id: 1,
           title: "Living in the shadow of a great man",
           topic: "mitch",
@@ -75,7 +76,7 @@ describe("/api/articles/:article_id", () => {
   });
 });
 
-describe("/api/articles/:article_id: Error Handling", () => {
+describe("GET /api/articles/:article_id: Error Handling", () => {
   test("400: responds with bad request when an id is sent that isn't a number", () => {
     return request(app)
     .get("/api/articles/chocolate")
@@ -95,6 +96,44 @@ describe("/api/articles/:article_id: Error Handling", () => {
   }) 
 })
 
+describe("GET /api/articles", () => {
+  test("200: responds with the sorted articles in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        const articles = response.body.articles
+        expect(articles.length).toBeGreaterThan(0)
+        articles.forEach((singleArticle) => {
+          expect(singleArticle).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number)
+          })
+        })
+      })
+  })
+
+  test("GET /api/articles - Error Handling", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles).toBeSorted({ descending: true });
+      articles.forEach((singleArticle) => { 
+        expect(singleArticle).not.toHaveProperty("body")
+      })
+
+    })
+  })
+
+})
 
 
 
