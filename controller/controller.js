@@ -1,6 +1,6 @@
 const db = require("../db/connection");
 const endpoints = require("../endpoints.json")
-const {selectTopics, selectArticleById, selectArticles} = require("../model/model")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId} = require("../model/model")
 
 exports.getApi = (req, res) => {
     res.status(200).send({endpoints})
@@ -30,5 +30,18 @@ exports.getArticles = (req, res) => {
     
     
 }
+
+exports.getCommentsByArticleId = (req, res, next) => {
+    const {article_id} = req.params; 
+    selectCommentsByArticleId(article_id).then((result) => {
+        res.status(200).send({ comments: result.rows});
+    })
+    .catch((err) => {
+        next(err)
+      }) 
+}
+
+
+
 
 

@@ -50,8 +50,7 @@ test("status:404, responds with an error message when passed a non-existent endp
     .get("/api/notARoute")
     .expect(404)
     .then(({ body: {msg} }) => {
-      console.log(msg)
-      expect(msg).toBe("404 error: not found");
+      expect(msg).toBe("Not found");
     });
 });
 
@@ -97,7 +96,7 @@ describe("GET /api/articles/:article_id: Error Handling", () => {
 })
 
 describe("GET /api/articles", () => {
-  test("200: responds with the sorted articles in descending order", () => {
+  test("200: responds with an array of objects containing articles", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -119,7 +118,7 @@ describe("GET /api/articles", () => {
       })
   })
 
-  test("GET /api/articles - Error Handling", () => {
+  test("GET /api/articles - Checking the array is sorted in descending order and making sure there is no body property", () => {
     return request(app)
     .get("/api/articles")
     .expect(200)
@@ -133,6 +132,62 @@ describe("GET /api/articles", () => {
     })
   })
 
+})
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: responds with the requested comments for a given article_id", () => {
+    return request(app)
+    .get("/api/articles/1/comments")
+    .expect(200)
+    .then((response) => {
+      const comments = response.body.comments
+      expect(comments[0]).toEqual({
+        comment_id: 5,
+        article_id: 1,
+        body: 'I hate streaming noses',
+        votes: 0,
+        author: 'icellusedkars',
+        created_at: "2020-11-03T21:00:00.000Z"
+      }
+
+      );
+    });
+  })
+  test("Checking the array is sorted in descending order by date", () => {
+    return request(app)
+    .get("/api/articles/1/comments")
+    .expect(200)
+    .then((response) => {
+      const comments = response.body.comments
+      expect(comments).toBeSorted({ descending: true });
+})
+})
+test("Returns an empty array if the article has zero comments", () => {
+  return request(app)
+  .get("/api/articles/2/comments")
+  .expect(200)
+  .then((response) => {
+    const comments = response.body.comments
+    expect(comments.length).toBe(0)
+  })
+})
+describe("Error Handling", () => {
+  test("400: responds with bad request when an id is sent that isn't a number", () => {
+    return request(app)
+    .get("/api/articles/chocolate/comments")
+    .then(({ body: { message } }) => {
+      expect(message).toBe('bad request: make sure you are sending a parameter of type number')
+    })
+  })
+  test("404: responds with error when an id is sent that is out of range but is a correct type", () => {
+    return request(app)
+    .get("/api/articles/1000000/comments")
+    .expect(404)
+    .then(({ body: { message } }) => {
+      expect(message).toBe('Not found: id 1000000 is out of range')
+    })
+  })
+})
 })
 
 
