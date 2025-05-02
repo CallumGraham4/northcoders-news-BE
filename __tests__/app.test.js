@@ -279,6 +279,18 @@ describe("PATCH: /api/articles/:article_id", () => {
 
   })
   describe("Error Handling", () => {
+     
+
+test("400: bad request - responds with bad request when the votes to take away is greater than the initial number of votes on the article", () => { 
+  const newVote = {inc_votes: -110} 
+  return request(app) 
+  .patch("/api/articles/1") 
+  .send(newVote) 
+  .expect(400) 
+  .then(({body}) => { 
+  expect(body.message).toBe("bad request: the article does not have this many votes") 
+  }) 
+  }) 
     test("400: bad request - responds with bad request when an id is sent that isn't a number", () => {
       const newVote = {inc_votes: 10}
       return request(app)
