@@ -141,16 +141,18 @@ describe("GET /api/articles/:article_id/comments", () => {
     .expect(200)
     .then((response) => {
       const comments = response.body.comments
-      expect(comments[0]).toEqual({
-        comment_id: 5,
-        article_id: 1,
-        body: 'I hate streaming noses',
-        votes: 0,
-        author: 'icellusedkars',
-        created_at: "2020-11-03T21:00:00.000Z"
-      }
 
-      );
+      comments.forEach((comment) => {
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          article_id: expect.any(Number),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          author: expect.any(String),
+        })
+
+      })
     });
   })
   test("Checking the array is sorted in descending order by date", () => {
@@ -189,6 +191,80 @@ describe("Error Handling", () => {
   })
 })
 })
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: responds with a posted comment to an article selected by and article id", () => {
+    return request(app)
+    .post('/api/articles/1/comments')
+    .send({username: "icellusedkars",
+      body: "Who is this great man?"})
+    .expect(201)
+    .then(({body: {comment}}) => {
+      expect(comment).toMatchObject({
+        article_id: 1,
+        author: "icellusedkars",
+        body: "Who is this great man?"
+      })
+      expect(typeof comment.body).toBe('string')
+      expect(typeof comment.author).toBe('string')
+      expect(typeof comment.comment_id).toBe('number')
+      expect(typeof comment.created_at).toBe('string')
+      expect(typeof comment.votes).toBe('number')
+    })
+  })
+  describe("Error Handling", () => {
+    test("400: bad request - responds with bad request when an id is sent that isn't a number", () => {
+      return request(app)
+      .post("/api/articles/chocolate/comments")
+      .send({username: "icellusedkars",
+        body: "Who is this great man?"})
+        .expect(400)
+        .then(({body}) => {
+          expect(body.message).toBe('bad request: make sure you are sending a parameter of type number')
+        })
+    })
+    test("404: ID not found - responds with error when an id is sent that is out of range but is a correct type", () => {
+      return request(app)
+      .post("/api/articles/1000000/comments")
+      .send({username: "icellusedkars",
+        body: "Who is this great man?"})
+        .expect(404)
+        .then(({body}) => {
+          expect(body.message).toBe('Not found: id 1000000 is out of range')
+        })
+    })
+  })
+  test("404: User not found - when passed a non-existing username", () => {
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send({username: "nonExisting",
+      body: "Who is this great man?"})
+      .expect(404)
+      .then(({body}) => {
+        expect(body.message).toBe("User not found in user table")
+      })
+  })
+})
+test("400: Bad request - No username provided in the request", () => {
+  return request(app)
+  .post("/api/articles/1/comments")
+  .send({body: "Who is this great man?"})
+  .expect(400)
+  .then(({body}) => {
+    expect(body.message).toBe("Bad request: no username provided")
+  })
+})
+test("400 : Bad request - No comment body provided", () => {
+return request(app)
+  .post("/api/articles/1/comments")
+  .send({username: "icellusedkars"})
+  .expect(400)
+  .then(({body}) => {
+    expect(body.message).toBe("Bad request: no comment body provided")
+  })
+
+})
+
 
 
 

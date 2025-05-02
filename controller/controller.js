@@ -1,6 +1,6 @@
 const db = require("../db/connection");
 const endpoints = require("../endpoints.json")
-const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId} = require("../model/model")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername} = require("../model/model")
 
 exports.getApi = (req, res) => {
     res.status(200).send({endpoints})
@@ -40,6 +40,32 @@ exports.getCommentsByArticleId = (req, res, next) => {
         next(err)
       }) 
 }
+
+exports.postCommentByArticleId = (req, res, next) => {
+    const {username, body} = req.body
+    const {article_id} = req.params
+    if (!username){
+        res.status(400).send({message: "Bad request: no username provided"})
+    }
+    if (!body){
+        res.status(400).send({message: "Bad request: no comment body provided"})
+    }
+    const existingUser = existingUsername(username)
+    Promise.all([existingUser])
+    .then(() => {
+    return insertCommentByArticleId(article_id, username, body).then((comment) => {
+        res.status(201).send({ comment });
+    })
+    .catch(next)
+
+    })
+    .catch(next)
+
+}
+
+
+
+
 
 
 

@@ -1,7 +1,7 @@
 const db = require("./db/connection");
 const express = require("express");
 const app = express();
-const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId} = require('./controller/controller')
+const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId} = require('./controller/controller')
 
 app.get("/api", getApi)
 
@@ -12,6 +12,11 @@ app.get("/api/articles/:article_id", getArticleById)
 app.get("/api/articles", getArticles)
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
+
+app.use(express.json());
+
+app.post("/api/articles/:article_id/comments", postCommentByArticleId)
+
 
 
 app.all('/api/*splat', (req, res) => {
