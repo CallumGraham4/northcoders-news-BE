@@ -1,6 +1,6 @@
 const db = require("../db/connection");
 const endpoints = require("../endpoints.json")
-const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername} = require("../model/model")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername, updateArticleVotesByArticleId} = require("../model/model")
 
 exports.getApi = (req, res) => {
     res.status(200).send({endpoints})
@@ -50,14 +50,29 @@ exports.postCommentByArticleId = (req, res, next) => {
     if (!body){
         res.status(400).send({message: "Bad request: no comment body provided"})
     }
-    const existingUser = existingUsername(username)
-    Promise.all([existingUser])
+    existingUsername(username)
+    
     .then(() => {
     return insertCommentByArticleId(article_id, username, body).then((comment) => {
         res.status(201).send({ comment });
     })
+    })
     .catch(next)
+}
 
+exports.patchArticleVotesByArticleId = (req, res, next) => {
+    const votes = req.body
+    const {article_id} = req.params
+    if (!votes.inc_votes){
+        res.status(400).send({message: "Bad request: body does not contain the correct fields"})
+    }
+    if(typeof votes.inc_votes !== 'number'){
+        res.status(400).send({message: "Bad request: body does not contain a valid field"})
+    }
+    updateArticleVotesByArticleId(votes, article_id)
+    .then(({rows}) => {
+        const updatedArticle = rows[0]
+        res.status(200).send({article: updatedArticle})
     })
     .catch(next)
 

@@ -265,6 +265,63 @@ return request(app)
 
 })
 
+describe("PATCH: /api/articles/:article_id", () => {
+  test("200: Updates the vote property in a relevant article_id", () => {
+    const newVote = {inc_votes: 10}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(200)
+    .then((response) => {
+      const updatedArticle = response.body.article
+      expect(updatedArticle.votes).toBe(110)
+    })
+
+  })
+  describe("Error Handling", () => {
+    test("400: bad request - responds with bad request when an id is sent that isn't a number", () => {
+      const newVote = {inc_votes: 10}
+      return request(app)
+      .patch("/api/articles/chocolate")
+      .send(newVote)
+      .expect(400)
+      .then(({body}) => {
+        expect(body.message).toBe("bad request: make sure you are sending a parameter of type number")
+      })
+    })
+  })
+  test("404: ID not found - responds with error when an id is sent that is out of range but is a correct type", () => {
+    const newVote = {inc_votes: 10}
+    return request(app)
+    .patch("/api/articles/1000000")
+    .send(newVote)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe("Not found: id 1000000 is out of range")
+    })
+  })
+  test("400: Bad request - responds with an error when the body does not contain the correct fields", () => {
+    const newVote = {}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe("Bad request: body does not contain the correct fields")
+    })
+  })
+  test("400: Bad request - responds with an error when the body is valid but has invalid fields", () => {
+    const newVote = {inc_votes: "invalid"}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe("Bad request: body does not contain a valid field")
+    })
+  })
+})
+
 
 
 
