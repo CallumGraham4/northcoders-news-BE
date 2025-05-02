@@ -14,7 +14,7 @@ const selectArticleById = (articleId) => {
     .then((result) => {
         if (result.rows.length === 0) {
 
-            return Promise.reject({status: 404, message: 'Not found: id 1000000 is out of range'})
+            return Promise.reject({status: 404, message: `Not found: id ${articleId} is out of range`})
     
             } 
         return result
@@ -46,25 +46,48 @@ const selectArticles = () => {
 
 
 const selectCommentsByArticleId = (article_id) => {
-    if (Number(article_id) && Number(article_id) < 18) {
     return db
-    .query(`SELECT * FROM comments WHERE article_id = $1
+    .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
+    .then((article) => {
+        if (article.rows.length === 0){
+            return Promise.reject({status: 404, message: `Not found: id ${article_id} is out of range`})
+        }
+        return db
+        .query(`SELECT * FROM comments WHERE article_id = $1
         ORDER BY comments.created_at DESC;`, [article_id])
-    } else {
-    return db
-    .query(`SELECT * FROM comments WHERE article_id = $1
-            ORDER BY comments.created_at DESC;`, [article_id])
-    .then((result) => {
-        if (result.rows.length === 0) {
-
-            return Promise.reject({status: 404, message: 'Not found: id 1000000 is out of range'})
-    
-            } 
-        return result
     })
-}}
+
+}
+
+const insertCommentByArticleId = (article_id, username, body) => { 
+    return db
+    .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
+    .then((article) => {
+        if (article.rows.length === 0){
+            return Promise.reject({status: 404, message: `Not found: id ${article_id} is out of range`})
+        }
+    return db
+    .query(`INSERT INTO comments (body, author, article_id)
+        VALUES ($1, $2, $3)
+        RETURNING comment_id, body, author, article_id, votes, created_at`, [body, username, article_id])
+    .then((result) => {
+        return result.rows[0]
+    })
+})
+}
+
+const existingUsername = (username) => {
+    return db
+    .query(`SELECT username FROM users WHERE username = $1`, [username])
+    .then((result) => {
+        if (!result.rows.length) {
+            return Promise.reject({status: 404, message: "User not found in user table"})
+        }
+        return result.rows[0]
+    })
+}
 
 
 
 
-module.exports = {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId}
+module.exports = {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername}
