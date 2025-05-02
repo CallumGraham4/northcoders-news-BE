@@ -94,6 +94,9 @@ const updateArticleVotesByArticleId = (votes, article_id) => {
         if (result.rows.length === 0){
             return Promise.reject({status: 404, message: `Not found: id ${article_id} is out of range`})
         }
+        if (result.rows[0].votes < 0){
+            return Promise.reject({status: 400, message: "bad request: the article does not have this many votes"})
+            }
         return result
     })
 }
