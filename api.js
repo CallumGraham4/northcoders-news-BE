@@ -1,7 +1,7 @@
 const db = require("./db/connection");
 const express = require("express");
 const app = express();
-const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleVotesByArticleId} = require('./controller/controller')
+const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleVotesByArticleId, deleteCommentByCommentId} = require('./controller/controller')
 
 app.get("/api", getApi)
 
@@ -18,6 +18,8 @@ app.use(express.json());
 app.post("/api/articles/:article_id/comments", postCommentByArticleId)
 
 app.patch("/api/articles/:article_id", patchArticleVotesByArticleId)
+
+app.delete("/api/comments/:comment_id", deleteCommentByCommentId);
 
 app.all('/api/*splat', (req, res) => {
   res.status(404).send({ msg: "Not found" });

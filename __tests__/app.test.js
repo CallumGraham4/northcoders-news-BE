@@ -334,6 +334,54 @@ test("400: bad request - responds with bad request when the votes to take away i
   })
 })
 
+describe("DELETE: /api/comments/:comment_id", () => {
+  test("204: checks for successfull deletion", () => {
+    return db
+      .query("SELECT COUNT(*) FROM COMMENTS")
+      .then((result) => {
+        return result.rows[0].count;
+      })
+      .then((totalBeforeDeletion) => {
+        return request(app)
+          .delete("/api/comments/3")
+          .expect(204)
+          .then(({ body }) => {
+            expect(body).toEqual({});
+          })
+          .then(() => {
+            return db.query("SELECT COUNT(*) FROM COMMENTS").then((result) => {
+              const totalAfterDeletion = result.rows[0].count;
+              expect(parseInt(totalAfterDeletion)).toEqual(
+                parseInt(totalBeforeDeletion) - 1
+              );
+            });
+          });
+      });
+  });
+  describe("DELETE: /api/comments/:comment_id - error handling", () => {
+    test("404: when trying to delete a comment which isnt found", () => {
+      return request(app)
+        .delete("/api/comments/1000000")
+        .expect(404)
+        .then(({ body: { message } }) => {
+          expect(message).toBe(
+            "404 Not found: comment id: 1000000 is out of range, delete attempt failed"
+          );
+        });
+    });
+
+    test("400: when trying to delete a comment at an invaid datatype", () => {
+      return request(app)
+        .delete("/api/comments/hello")
+        .expect(400)
+        .then(({ body: { message } }) => {
+          expect(message).toBe(
+            "bad request: make sure you are sending a parameter of type number"
+          );
+        });
+    });
+  });
+});
 
 
 

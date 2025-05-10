@@ -1,30 +1,29 @@
-const db = require("../db/connection")
+const db = require("../db/connection");
 
 const selectTopics = () => {
-
-    return db.query('SELECT * FROM topics').then(({rows})=>{
-
-        
-        return rows
-    })
-}
+  return db.query("SELECT * FROM topics").then(({ rows }) => {
+    return rows;
+  });
+};
 
 const selectArticleById = (articleId) => {
-    return db.query('SELECT * FROM articles WHERE article_id = $1', [articleId])
+  return db
+    .query("SELECT * FROM articles WHERE article_id = $1", [articleId])
     .then((result) => {
-        if (result.rows.length === 0) {
-
-            return Promise.reject({status: 404, message: `Not found: id ${articleId} is out of range`})
-    
-            } 
-        return result
-    })
-}
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: `Not found: id ${articleId} is out of range`,
+        });
+      }
+      return result;
+    });
+};
 
 const selectArticles = () => {
-    return db
+  return db
     .query(
-        `SELECT 
+      `SELECT 
         articles.author,
         articles.title,
         articles.article_id,
@@ -36,72 +35,114 @@ const selectArticles = () => {
         FROM articles
         LEFT OUTER JOIN comments ON comments.article_id = articles.article_id
         GROUP BY articles.article_id
-        ORDER BY articles.created_at DESC;`)
-        .then(({rows})=>{
-
-        
-            return rows
-        })
-}
-
+        ORDER BY articles.created_at DESC;`
+    )
+    .then(({ rows }) => {
+      return rows;
+    });
+};
 
 const selectCommentsByArticleId = (article_id) => {
-    return db
+  return db
     .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
     .then((article) => {
-        if (article.rows.length === 0){
-            return Promise.reject({status: 404, message: `Not found: id ${article_id} is out of range`})
-        }
-        return db
-        .query(`SELECT * FROM comments WHERE article_id = $1
-        ORDER BY comments.created_at DESC;`, [article_id])
-    })
+      if (article.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: `Not found: id ${article_id} is out of range`,
+        });
+      }
+      return db.query(
+        `SELECT * FROM comments WHERE article_id = $1
+        ORDER BY comments.created_at DESC;`,
+        [article_id]
+      );
+    });
+};
 
-}
-
-const insertCommentByArticleId = (article_id, username, body) => { 
-    return db
+const insertCommentByArticleId = (article_id, username, body) => {
+  return db
     .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
     .then((article) => {
-        if (article.rows.length === 0){
-            return Promise.reject({status: 404, message: `Not found: id ${article_id} is out of range`})
-        }
-    return db
-    .query(`INSERT INTO comments (body, author, article_id)
+      if (article.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: `Not found: id ${article_id} is out of range`,
+        });
+      }
+      return db
+        .query(
+          `INSERT INTO comments (body, author, article_id)
         VALUES ($1, $2, $3)
-        RETURNING comment_id, body, author, article_id, votes, created_at`, [body, username, article_id])
-    .then((result) => {
-        return result.rows[0]
-    })
-})
-}
+        RETURNING comment_id, body, author, article_id, votes, created_at`,
+          [body, username, article_id]
+        )
+        .then((result) => {
+          return result.rows[0];
+        });
+    });
+};
 
 const existingUsername = (username) => {
-    return db
+  return db
     .query(`SELECT username FROM users WHERE username = $1`, [username])
     .then((result) => {
-        if (!result.rows.length) {
-            return Promise.reject({status: 404, message: "User not found in user table"})
-        }
-        return result.rows[0]
-    })
-}
+      if (!result.rows.length) {
+        return Promise.reject({
+          status: 404,
+          message: "User not found in user table",
+        });
+      }
+      return result.rows[0];
+    });
+};
 
 const updateArticleVotesByArticleId = (votes, article_id) => {
-    return db
-    .query(`UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`, [votes.inc_votes, article_id])
+  return db
+    .query(
+      `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`,
+      [votes.inc_votes, article_id]
+    )
     .then((result) => {
-        if (result.rows.length === 0){
-            return Promise.reject({status: 404, message: `Not found: id ${article_id} is out of range`})
-        }
-        if (result.rows[0].votes < 0){ 
-            return Promise.reject({status: 400, message: "bad request: the article does not have this many votes"}) 
-            } 
-        return result
-    })
-}
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: `Not found: id ${article_id} is out of range`,
+        });
+      }
+      if (result.rows[0].votes < 0) {
+        return Promise.reject({
+          status: 400,
+          message: "bad request: the article does not have this many votes",
+        });
+      }
+      return result;
+    });
+};
 
+const deleteFromComments = (commentId) => {
+  return db
+    .query(`DELETE FROM Comments WHERE comment_id = $1 RETURNING *;`, [
+      commentId,
+    ])
+    .then((result) => {
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: `404 Not found: comment id: ${commentId} is out of range, delete attempt failed`,
+        });
+      }
+      return result;
+    });
+};
 
-
-
-module.exports = {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername, updateArticleVotesByArticleId}
+module.exports = {
+  selectTopics,
+  selectArticleById,
+  selectArticles,
+  selectCommentsByArticleId,
+  insertCommentByArticleId,
+  existingUsername,
+  updateArticleVotesByArticleId,
+  deleteFromComments,
+};
