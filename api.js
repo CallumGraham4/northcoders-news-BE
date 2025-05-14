@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleVotesByArticleId, deleteCommentByCommentId, getUsers} = require('./controller/controller')
 
+app.use(express.json());
+
 app.get("/api", getApi)
 
 app.get("/api/topics", getTopics)
@@ -13,8 +15,6 @@ app.get("/api/articles", getArticles)
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
-app.use(express.json());
-
 app.post("/api/articles/:article_id/comments", postCommentByArticleId)
 
 app.patch("/api/articles/:article_id", patchArticleVotesByArticleId)
@@ -23,28 +23,23 @@ app.delete("/api/comments/:comment_id", deleteCommentByCommentId);
 
 app.get("/api/users", getUsers)
 
-app.all('/api/*splat', (req, res) => {
-  res.status(404).send({ msg: "Not found" });
-});
-
 app.use((err, req, res, next) => {
-  if (err.status && err.message){
-  res.status(err.status).send({message: err.message})
+
+  if(err.code === "22P02"){
+      return res.status(400).send({message: "Bad request"})
+  } if (err.code === '23503') {
+      res.status(404).send({message: "Not found"})
   }
-  next(err)
-})
-app.use((err, req, res, next) => {
-
-  
-  if (err.code === '22P02') {
-  res.status(400).send({message: 'bad request: make sure you are sending a parameter of type number'})
-  } 
-  next(err) 
+  if(err.status && err.message){
+      return res.status(err.status).send({message: err.message})
+  }
+  res.status(500).send({message: "Internal Server Error"})
 })
 
-app.use((err, req, res, next) => {
-  res.status(500).send({ msg: "Server Error!"});
-});
+app.use((req, res) => {
+  res.status(404).send({message: "Not found"})
+})
+
 
 
 
