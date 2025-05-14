@@ -49,8 +49,8 @@ test("status:404, responds with an error message when passed a non-existent endp
   return request(app)
     .get("/api/notARoute")
     .expect(404)
-    .then(({ body: {msg} }) => {
-      expect(msg).toBe("Not found");
+    .then(({ body: {message} }) => {
+      expect(message).toBe("Not found");
     });
 });
 
@@ -81,7 +81,7 @@ describe("GET /api/articles/:article_id: Error Handling", () => {
     .get("/api/articles/chocolate")
     .expect(400)
     .then(({ body: { message } }) => {
-      expect(message).toBe('bad request: make sure you are sending a parameter of type number')
+      expect(message).toBe('Bad request')
     })
   }) 
 
@@ -178,7 +178,7 @@ describe("Error Handling", () => {
     return request(app)
     .get("/api/articles/chocolate/comments")
     .then(({ body: { message } }) => {
-      expect(message).toBe('bad request: make sure you are sending a parameter of type number')
+      expect(message).toBe('Bad request')
     })
   })
   test("404: responds with error when an id is sent that is out of range but is a correct type", () => {
@@ -220,7 +220,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         body: "Who is this great man?"})
         .expect(400)
         .then(({body}) => {
-          expect(body.message).toBe('bad request: make sure you are sending a parameter of type number')
+          expect(body.message).toBe('Bad request')
         })
     })
     test("404: ID not found - responds with error when an id is sent that is out of range but is a correct type", () => {
@@ -298,7 +298,7 @@ test("400: bad request - responds with bad request when the votes to take away i
       .send(newVote)
       .expect(400)
       .then(({body}) => {
-        expect(body.message).toBe("bad request: make sure you are sending a parameter of type number")
+        expect(body.message).toBe("Bad request")
       })
     })
   })
@@ -309,7 +309,7 @@ test("400: bad request - responds with bad request when the votes to take away i
     .send(newVote)
     .expect(404)
     .then(({body}) => {
-      expect(body.message).toBe("Not found: id 1000000 is out of range")
+      expect(body.message).toBe("Not found")
     })
   })
   test("400: Bad request - responds with an error when the body does not contain the correct fields", () => {
@@ -365,7 +365,7 @@ describe("DELETE: /api/comments/:comment_id", () => {
         .expect(404)
         .then(({ body: { message } }) => {
           expect(message).toBe(
-            "404 Not found: comment id: 1000000 is out of range, delete attempt failed"
+           "Not found"
           );
         });
     });
@@ -376,7 +376,7 @@ describe("DELETE: /api/comments/:comment_id", () => {
         .expect(400)
         .then(({ body: { message } }) => {
           expect(message).toBe(
-            "bad request: make sure you are sending a parameter of type number"
+            "Bad request"
           );
         });
     });
@@ -406,10 +406,48 @@ describe("GET /api/users error handling", () => {
     .get("/api/bananas")
     .expect(404)
     .then((response) => {
-      expect(response.body.msg).toBe("Not found")
+      expect(response.body.message).toBe("Not found")
     })
   })
 })
 
+describe("GET /api/articles (topic query", () => {
+  test("200: responds with filtered articles by specified topic", () => {
+    return request(app)
+    .get("/api/articles?topic=cats")
+    .expect(200)
+    .then((response) => {
+    const articles = response.body.articles
+    expect(articles.length).toBe(1)
+    articles.forEach((article) => {
+      console.log(article)
+      expect(article).toHaveProperty("article_id")
+      expect(article).toHaveProperty("topic")
+      expect(article).toHaveProperty("author")
+      expect(article).toHaveProperty("created_at")
+      expect(article).toHaveProperty("votes")
+      expect(article).toHaveProperty("article_img_url")
+      expect(article.topic).toBe("cats")
+    })
+  })
+  })
+  test("200: responds with an empty array if there are no articles with that topic (valid topic)", () => {
+    return request(app)
+    .get("/api/articles?topic=paper")
+    .expect(200)
+    .then((response) => {
+      expect(response.body.articles).toEqual([])
+    })
+  })
+})
 
-
+describe("GET /api/articles (topic query) error handling", () => {
+  test("404: responds with error if no topic with that name", () => {
+    return request(app)
+    .get("/api/articles?topic=bananas")
+    .expect(404)
+    .then((response) => {
+      expect(response.body.message).toBe("Not found")
+    })
+  })
+})

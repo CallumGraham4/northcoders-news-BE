@@ -1,4 +1,6 @@
 const db = require("../db/connection");
+const { sort } = require("../db/data/test-data/articles")
+
 
 const selectTopics = () => {
   return db.query("SELECT * FROM topics").then(({ rows }) => {
@@ -20,27 +22,27 @@ const selectArticleById = (articleId) => {
     });
 };
 
-const selectArticles = () => {
-  return db
-    .query(
-      `SELECT 
-        articles.author,
-        articles.title,
-        articles.article_id,
-        articles.topic,
-        articles.created_at,
-        articles.votes,
-        articles.article_img_url,
-        COUNT(comments.comment_id):: INT AS comment_count
-        FROM articles
-        LEFT OUTER JOIN comments ON comments.article_id = articles.article_id
-        GROUP BY articles.article_id
-        ORDER BY articles.created_at DESC;`
-    )
-    .then(({ rows }) => {
-      return rows;
-    });
-};
+// const selectArticles = () => {
+//   return db
+//     .query(
+//       `SELECT
+//         articles.author,
+//         articles.title,
+//         articles.article_id,
+//         articles.topic,
+//         articles.created_at,
+//         articles.votes,
+//         articles.article_img_url,
+//         COUNT(comments.comment_id):: INT AS comment_count
+//         FROM articles
+//         LEFT OUTER JOIN comments ON comments.article_id = articles.article_id
+//         GROUP BY articles.article_id
+//         ORDER BY articles.created_at DESC;`
+//     )
+//     .then(({ rows }) => {
+//       return rows;
+//     });
+// };
 
 const selectCommentsByArticleId = (article_id) => {
   return db
@@ -107,7 +109,7 @@ const updateArticleVotesByArticleId = (votes, article_id) => {
       if (result.rows.length === 0) {
         return Promise.reject({
           status: 404,
-          message: `Not found: id ${article_id} is out of range`,
+          message: `Not found`,
         });
       }
       if (result.rows[0].votes < 0) {
@@ -129,7 +131,7 @@ const deleteFromComments = (commentId) => {
       if (result.rows.length === 0) {
         return Promise.reject({
           status: 404,
-          message: `404 Not found: comment id: ${commentId} is out of range, delete attempt failed`,
+          message: `Not found`,
         });
       }
       return result;
@@ -137,13 +139,57 @@ const deleteFromComments = (commentId) => {
 };
 
 const selectUsers = () => {
-  return db
-  .query(`SELECT * FROM users`)
-  .then((result) => {
-      return result.rows
-  })
+  return db.query(`SELECT * FROM users`).then((result) => {
+    return result.rows;
+  });
+};
 
-}
+const selectArticles = (sort_by = "created_at", order = "desc", topic) => {
+  const allowedInputs = [
+    "article_id",
+    "author",
+    "title",
+    "topic",
+    "created_at",
+    "votes",
+    "article_img_url",
+  ];
+  const allowedOrders = ["desc", "asc"];
+
+  if (!allowedInputs.includes(sort_by)) {
+    return Promise.reject({ status: 400, message: "Bad request" });
+  }
+
+  if (!allowedOrders.includes(order)) {
+    return Promise.reject({ status: 400, message: "Bad request" });
+  }
+
+  let queryStr = `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT (comments.comment_id) :: INT AS comment_count FROM articles
+  LEFT OUTER JOIN comments ON articles.article_id = comments.article_id`;
+  const queryValues = [];
+
+  if (topic) {
+    queryStr += ` WHERE articles.topic = $1`;
+    queryValues.push(topic);
+  }
+
+  queryStr += ` GROUP BY articles.article_id
+  ORDER BY ${sort_by} ${order}`;
+
+  return db.query(queryStr, queryValues).then((result) => {
+    if (topic && result.rows.length === 0) {
+      return db
+        .query(`SELECT * FROM topics WHERE slug = $1`, [topic])
+        .then((nextResult) => {
+          if (nextResult.rows.length === 0) {
+            return Promise.reject({ status: 404, message: "Not found" });
+          }
+          return result.rows;
+        });
+    }
+    return result.rows;
+  });
+};
 
 module.exports = {
   selectTopics,
@@ -154,5 +200,5 @@ module.exports = {
   existingUsername,
   updateArticleVotesByArticleId,
   deleteFromComments,
-  selectUsers
+  selectUsers,
 };
