@@ -383,5 +383,33 @@ describe("DELETE: /api/comments/:comment_id", () => {
   });
 });
 
+describe("GET /api/users", () => {
+  test("200: responds with an array of user objects with properties username, name, avatar_url", () => {
+    return request(app)
+    .get("/api/users")
+    .expect(200)
+    .then((response) => {
+      const users = response.body.users
+      expect(users.length).toBe(4)
+      users.forEach((user) => {
+        expect(user).toHaveProperty("username")
+        expect(user).toHaveProperty("name")
+        expect(user).toHaveProperty("avatar_url")
+      })
+    })
+  })
+})
+
+describe("GET /api/users error handling", () => {
+  test("404: responds with error if endpoint doesn't exist", () => {
+    return request(app)
+    .get("/api/bananas")
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe("Not found")
+    })
+  })
+})
+
 
 
