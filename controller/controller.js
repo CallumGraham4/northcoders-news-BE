@@ -1,6 +1,6 @@
 const db = require("../db/connection");
 const endpoints = require("../endpoints.json")
-const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername, updateArticleVotesByArticleId, deleteFromComments} = require("../model/model")
+const {selectTopics, selectArticleById, selectArticles, selectCommentsByArticleId, insertCommentByArticleId, existingUsername, updateArticleVotesByArticleId, deleteFromComments, selectUsers} = require("../model/model")
 
 exports.getApi = (req, res) => {
     res.status(200).send({endpoints})
@@ -88,6 +88,16 @@ exports.deleteCommentByCommentId = (req, res, next) => {
         next(err);
       });
   };
+
+  exports.getUsers = (req, res, next) => {
+    selectUsers()
+    .then((result) => {
+        res.status(200).send({users: result})
+    })
+    .catch((err) => {
+        next(err)
+    })
+}
 
 
 

@@ -136,6 +136,15 @@ const deleteFromComments = (commentId) => {
     });
 };
 
+const selectUsers = () => {
+  return db
+  .query(`SELECT * FROM users`)
+  .then((result) => {
+      return result.rows
+  })
+
+}
+
 module.exports = {
   selectTopics,
   selectArticleById,
@@ -145,4 +154,5 @@ module.exports = {
   existingUsername,
   updateArticleVotesByArticleId,
   deleteFromComments,
+  selectUsers
 };

@@ -85,7 +85,15 @@
         "exampleResponse": {
             "updatedArticle": "no response just a 204 confirmation"
         }
-    }
+    },
+    "GET /api/users": {
+      "description": "A topic is displayed when using this endpoint",
+      "exampleResponse": 
+        { "username": "butter_bridge",
+          "name": "jonny",
+          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+        }      
+  }
   }
   
 
