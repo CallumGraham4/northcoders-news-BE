@@ -420,7 +420,6 @@ describe("GET /api/articles (topic query", () => {
     const articles = response.body.articles
     expect(articles.length).toBe(1)
     articles.forEach((article) => {
-      console.log(article)
       expect(article).toHaveProperty("article_id")
       expect(article).toHaveProperty("topic")
       expect(article).toHaveProperty("author")
