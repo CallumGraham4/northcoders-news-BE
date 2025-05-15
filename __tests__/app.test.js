@@ -66,6 +66,7 @@ describe("GET /api/articles/:article_id", () => {
           topic: "mitch",
           author: "butter_bridge",
           body: "I find this existence challenging",
+          comment_count: 11,
           created_at: "2020-07-09T20:11:00.000Z",
           votes: 100,
           article_img_url:"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
@@ -90,7 +91,7 @@ describe("GET /api/articles/:article_id: Error Handling", () => {
     .get("/api/articles/1000000")
     .expect(404)
     .then(({ body: { message } }) => {
-      expect(message).toBe('Not found: id 1000000 is out of range')
+      expect(message).toBe('Not found')
     })
   }) 
 })
@@ -552,3 +553,57 @@ describe("GET /api/articles (sorting queries) error handling", () => {
   })
 })
 
+describe("GET /api/articles/:article_id (comment count feature request)", () => {
+  test("200: responds with specified article with comment count added (multiple comments)", () => {
+    return request(app)
+    .get("/api/articles/1")
+    .expect(200)
+    .then((response) => {
+      const article = response.body.article
+      expect(article.title).toBe("Living in the shadow of a great man")
+      expect(article.topic).toBe("mitch")
+      expect(article.body).toBe("I find this existence challenging")
+      expect(article.author).toBe("butter_bridge")
+      expect(article.created_at).toBe("2020-07-09T20:11:00.000Z")
+      expect(article.votes).toBe(100)
+      expect(article.article_img_url).toBe("https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700")
+      expect(article.comment_count).toBe(11)
+      })
+    })
+    test("200: responds with specified article with comment count of 0 if there are no comments", () => {
+      return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then((response) => {
+        const article = response.body.article
+      expect(article.title).toBe("Sony Vaio; or, The Laptop")
+      expect(article.topic).toBe("mitch")
+      expect(article.body).toBe("Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.")
+      expect(article.author).toBe("icellusedkars")
+      expect(article.created_at).toBe("2020-10-16T05:03:00.000Z")
+      expect(article.votes).toBe(0),
+      expect(article.article_img_url).toBe(
+      "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"),
+      expect(article.comment_count).toBe(0)
+      })
+    })
+    })
+
+    describe("GET /api/articles/:article_id (comment count feature request) error handling", () => {
+      test("400: responds with error if invalid article_id", () => {
+        return request(app)
+        .get("/api/articles/banana")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.message).toBe("Bad request")
+        })
+      })
+      test("404: responds with error if article does not exist", () => {
+        return request(app)
+        .get("/api/articles/47")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.message).toBe("Not found")
+        })
+      })
+    })
