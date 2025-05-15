@@ -120,7 +120,7 @@ exports.getArticles = (req, res, next) => {
     const receivedKeys = Object.keys(req.query)
     for(const key of receivedKeys){
         if(!allowedKeys.includes(key)){
-            return next({status: 400, msg: "Bad request"})
+            return next({status: 400, message: "Bad request"})
         }
     }
 
